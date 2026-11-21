@@ -1,0 +1,14 @@
+# Extracted/decoded firmware artifacts, kernels, and build outputs — never commit these.
+work/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Scratch files
+scratchpad_*.py
+
+# OS cruft
+Thumbs.db
+.DS_Store
