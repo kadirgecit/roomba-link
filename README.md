@@ -62,6 +62,22 @@ officially-sold Adapter Board did.
 If you're looking for firmware files, this isn't the place — go to iRobot's
 own OTA infrastructure or ask them directly.
 
+## Firmware analyzed
+
+So contributors can reproduce or cross-check findings, here's exactly
+what this analysis is based on:
+
+- **Robot:** iRobot Roomba i7+
+- **Firmware version** (from `/etc/version` on the extracted rootfs):
+  `lewis+22.52.10+2023-10-03-e032ab4903c+Firmware-Build+4820`
+- **Internal platform codename:** `lewis`
+- **SoC:** Qualcomm MSM8909
+
+"`lewis`" and the version/build numbers above are the strings to match
+against when looking for the same (or a comparable) image in the
+third-party archive linked under [References](#references) — we are not
+redistributing the image itself, only citing which one we used.
+
 ## Findings so far
 
 ### Hardware
@@ -152,6 +168,15 @@ firmware):
   interact with it over the emulated serial console
 - `adapter-board/` — *(coming soon)* original KiCad schematic/PCB files
   for the open-source adapter board once the pinout is confirmed
+- `explore.py` — quick grep-by-regex over a SquashFS image's path list,
+  for poking around a rootfs before fully extracting it
+- `strs.py` — minimal `strings`-equivalent (prints runs of printable
+  ASCII of a given minimum length from any binary file)
+- `reference/iRobot_Create_3_Public_Model.step` — iRobot's own
+  publicly-released CAD model of the Create 3 robot, used for
+  dimensional/physical reference when comparing to the i7+ (downloaded
+  as-is from iRobot's own [create3_docs](https://github.com/iRobotEducation/create3_docs)
+  repo; not modified)
 
 See [Unpacking the firmware and running it in QEMU](#unpacking-the-firmware-and-running-it-in-qemu)
 for step-by-step instructions.
@@ -165,8 +190,8 @@ require redistributing any firmware; you supply the image.
 
 **You will need:**
 - Python 3 with the `PySquashfsImage` package (`pip install PySquashfsImage`)
-- [QEMU](https://www.qemu.org/) with `qemu-system-arm` on your PATH (or
-  adjust the hardcoded path in `robot_vm.py`/`boot_interactive.bat`)
+- [QEMU](https://www.qemu.org/) with `qemu-system-arm` on your PATH, or
+  set the `QEMU_SYSTEM_ARM` environment variable to its full path
 - A generic ARM Linux kernel + initrd-capable `virt`-machine support —
   a stock Debian `linux-image-armmp` kernel works and avoids needing the
   robot's own hardware-specific boot chain (which won't boot under QEMU's
