@@ -144,7 +144,9 @@ reference/identification purposes with credit:
 ## Open questions / help wanted
 
 - [ ] Confirm exact pin assignment of the 18-pin factory connector
-      (USB D+/D-/VBUS/GND vs. STM32 SWD/UART vs. shared lines)
+      (USB D+/D-/VBUS/GND vs. STM32 SWD/UART vs. shared lines) — see
+      [reference/pin-mapping-plan.md](reference/pin-mapping-plan.md) for
+      the planned probing procedure and reference pinouts
 - [ ] Identify whether a standard PCIe x1 slot connector mechanically
       mates with this connector (pitch/thickness to be confirmed)
 - [ ] Anyone with teardown experience on other iRobot models (Create 3,
