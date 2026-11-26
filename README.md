@@ -100,14 +100,25 @@ redistributing the image itself, only citing which one we used.
   - A probable USB device port on face-down pins 2 to 6, in micro-USB order
     (VBUS, D-, D+, ID, GND), with D+ at 3.29 V and D- at 0 V. Inferred from
     the readings; not yet confirmed against a host
-  - A few live-looking signal pins, including a roughly 28.9 kHz PWM-like
-    line on face-up 6, and 11 pins that look unconnected
+  - The robot's serial console on face-up 6 (115200 baud, 8N1, 1.8 V
+    logic), confirmed by decoding its boot log; face-up 7 is the probable
+    receive line
+  - A few other live-looking signal pins, and 11 pins that look unconnected
   - No unregulated battery voltage appears on the connector
 
 ### Software/protocol
 - The Linux side enumerates as a USB composite gadget (VID `05C6`,
-  PID `9091`) offering RNDIS (networking), Qualcomm DIAG, ACM (serial
-  console), and ADB — depending on provisioning/lock state
+  PID `9091`) offering RNDIS (networking), Qualcomm DIAG, ACM (serial),
+  and ADB — depending on provisioning/lock state. When locked down, ADB
+  and the UART login are switched off; RNDIS, DIAG and ACM stay on
+- The debug console is the SoC's UART1 (`ttyHSL0`) at 115200 8N1, 1.8 V.
+  The bootloader and kernel print there, and a login runs on it unless the
+  robot is locked down. The motor-controller link is a separate internal
+  UART (`ttyMobility0`)
+- The kernel is Linux 3.18.71. The bootloader selects Qualcomm's stock
+  "APQ8009 Robot Reference Board" device tree, whose USB controller runs in
+  OTG mode (device and host). Details, and the cross-check against our
+  measurements, are in [reference/firmware-crosscheck.md](reference/firmware-crosscheck.md)
 - A local TLS-wrapped MQTT service exists for direct app-to-robot
   communication on the local network, independent of the cloud path
   (this overlaps with what the home-automation community has already
@@ -157,10 +168,14 @@ reference/identification purposes with credit:
 
 - [ ] Confirm the probable USB D-/D+ lines (face-down 3 and 4) by
       connecting them to a PC and checking that it enumerates a device
-- [ ] Identify the remaining signal pins (a possible UART on face-down 13
-      or face-up 16, and the PWM-like line on face-up 6) with a logic
-      analyzer — see [reference/pin-mapping-plan.md](reference/pin-mapping-plan.md)
-      for the probing procedure and [reference/connector-pinout.md](reference/connector-pinout.md)
+- [x] Identify the debug console: face-up 6 is the SoC's UART TX at
+      115200 8N1, 1.8 V, confirmed by decoding the boot log
+- [ ] Confirm face-up 7 as the console receive line and get an
+      interactive console (needs a 1.8 V serial adapter)
+- [ ] Identify the remaining signal pins (face-down 13, face-up 16 and the
+      3.1 V lines) with a logic analyzer — see
+      [reference/pin-mapping-plan.md](reference/pin-mapping-plan.md) for the
+      probing procedure and [reference/connector-pinout.md](reference/connector-pinout.md)
       for the measured map
 - [x] Identify whether a standard PCIe x1 slot connector mechanically
       mates with this connector — it does, once guide rails are
@@ -193,6 +208,11 @@ firmware):
   for poking around a rootfs before fully extracting it
 - `strs.py` — minimal `strings`-equivalent (prints runs of printable
   ASCII of a given minimum length from any binary file)
+- `bootimg_split.py` — splits an Android-format boot image into kernel,
+  ramdisk and device-tree parts, and prints its kernel command line,
+  version and embedded config
+- `fdt_dump.py` — finds every device tree embedded in a file (such as a
+  kernel with appended device trees) and decompiles each one to text
 - `reference/iRobot_Create_3_Public_Model.step` — iRobot's own
   publicly-released CAD model of the Create 3 robot, used for
   dimensional/physical reference when comparing to the i7+ (downloaded
@@ -306,6 +326,21 @@ root
 for the robot's own boot chain — see step 4 above. Everything else is
 the actual extracted robot userland running for real, just emulated and
 fully offline.)
+
+## Inspecting the boot image and device trees
+
+The OTA package also contains an Android-format boot image holding the
+robot's kernel. It carries the kernel command line and the device trees
+that describe the SoC's UART and USB blocks. After step 2 above, find the
+part that begins with the bytes `ANDROID!`, then:
+
+```
+python -I bootimg_split.py work/parts/<boot_image_part>.bin work/bootimg
+python -I fdt_dump.py work/bootimg/kernel.bin work/bootimg/dts
+```
+
+What this showed, compared with the measurements on the connector, is in
+[reference/firmware-crosscheck.md](reference/firmware-crosscheck.md).
 
 ## License
 

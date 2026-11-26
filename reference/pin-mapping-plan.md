@@ -6,7 +6,9 @@ face, 36 total).
 **Status:** the first complete multimeter pass is done, and the results are
 in [connector-pinout.md](connector-pinout.md). The multimeter procedure
 below is kept as the method. The logic-analyzer sections are still the plan
-for the remaining unknowns: confirming USB and finding any UART.
+for the remaining unknowns: confirming USB and identifying the remaining
+signal pins. The console UART has already been found on face-up 6 by
+decoding a boot capture at 115200 8N1 (see the worked example below).
 
 ## What we're looking for, in priority order
 
@@ -101,6 +103,17 @@ checks (step 1-3), and only reintroduce power for step 4.
      relevant if something external is also driving SWD, which won't be
      the case just from robot power-on; more useful once we're actively
      trying to drive SWD ourselves.
+
+### Worked example: finding the console UART
+
+Capture the suspect pin with a shared ground, start recording before
+powering the robot on, and keep the capture running through boot. In Logic 2,
+add an Async Serial analyzer on that channel at 115200 baud, 8 bits, 1 stop
+bit, no parity, not inverted, and open the terminal view. At power-on the
+robot printed its bootloader log, which confirmed face-up 6. Strings from
+the firmware, such as the bootloader banner, make a good check. The SoC
+side is 1.8 V, so make sure your analyzer reads 1.8 V as high, and never
+attach a 3.3 V serial adapter.
 
 ## Once we have a confirmed pinout
 
