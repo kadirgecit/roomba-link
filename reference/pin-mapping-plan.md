@@ -1,9 +1,12 @@
 # Connector pin-mapping plan
 
-Working notes for mapping the 18-pin factory/debug connector once the
-multimeter and logic analyzer are in hand. This is a plan, not a result —
-nothing here has been measured yet. Goal: fill in a real pinout table and
-move it into the main README's findings once confirmed.
+Working notes for mapping the factory/debug connector (18 contacts per
+face, 36 total).
+
+**Status:** the first complete multimeter pass is done, and the results are
+in [connector-pinout.md](connector-pinout.md). The multimeter procedure
+below is kept as the method. The logic-analyzer sections are still the plan
+for the remaining unknowns: confirming USB and finding any UART.
 
 ## What we're looking for, in priority order
 
@@ -101,8 +104,10 @@ checks (step 1-3), and only reintroduce power for step 4.
 
 ## Once we have a confirmed pinout
 
-- Fill in the real table here, then move the summary into the main
-  [README](../README.md) "Findings so far" section.
-- Update the "Open questions / help wanted" checklist.
-- Start the `adapter-board/` KiCad files referenced in the README's
+- The measured table lives in [connector-pinout.md](connector-pinout.md)
+  and is summarized in the main [README](../README.md).
+- Remaining before the adapter board: connect the probable USB D-/D+ pins
+  to a PC to confirm them, and capture the live-looking signal pins with
+  the logic analyzer.
+- Then start the `adapter-board/` KiCad files referenced in the README's
   Tools section.

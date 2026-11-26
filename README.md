@@ -86,11 +86,23 @@ redistributing the image itself, only citing which one we used.
   Wi-Fi/BT combo module (FCC ID ZW9AXCY1)
 - An internal factory/debug access connector matching the pin count and
   keying-notch position of a standard PCIe x1 edge connector (18 gold
-  fingers, split 11+7 by the notch) — currently working on confirming
-  pinout via continuity tracing
+  fingers per face, 36 contacts, split 11+7 by the notch). A PCIe x1 slot
+  connector mates with it once guide rails are heat-formed into the sides
+  of the slot's plastic housing. Only the mechanical form factor matches;
+  the signals are not PCIe.
 - This same physical connector appears to match the one iRobot's
   (discontinued) Create 3 educational robot exposes via its official
   "Adapter Board" for USB-C/BLE companion-computer access
+- First complete multimeter pass over all 36 contacts, summarized here and
+  tabulated in [reference/connector-pinout.md](reference/connector-pinout.md):
+  - 7 ground pins, and 4 pins on one 5 V net that the robot sources on
+    battery power
+  - A probable USB device port on face-down pins 2 to 6, in micro-USB order
+    (VBUS, D-, D+, ID, GND), with D+ at 3.29 V and D- at 0 V. Inferred from
+    the readings; not yet confirmed against a host
+  - A few live-looking signal pins, including a roughly 28.9 kHz PWM-like
+    line on face-up 6, and 11 pins that look unconnected
+  - No unregulated battery voltage appears on the connector
 
 ### Software/protocol
 - The Linux side enumerates as a USB composite gadget (VID `05C6`,
@@ -143,12 +155,18 @@ reference/identification purposes with credit:
 
 ## Open questions / help wanted
 
-- [ ] Confirm exact pin assignment of the 18-pin factory connector
-      (USB D+/D-/VBUS/GND vs. STM32 SWD/UART vs. shared lines) — see
-      [reference/pin-mapping-plan.md](reference/pin-mapping-plan.md) for
-      the planned probing procedure and reference pinouts
-- [ ] Identify whether a standard PCIe x1 slot connector mechanically
-      mates with this connector (pitch/thickness to be confirmed)
+- [ ] Confirm the probable USB D-/D+ lines (face-down 3 and 4) by
+      connecting them to a PC and checking that it enumerates a device
+- [ ] Identify the remaining signal pins (a possible UART on face-down 13
+      or face-up 16, and the PWM-like line on face-up 6) with a logic
+      analyzer — see [reference/pin-mapping-plan.md](reference/pin-mapping-plan.md)
+      for the probing procedure and [reference/connector-pinout.md](reference/connector-pinout.md)
+      for the measured map
+- [x] Identify whether a standard PCIe x1 slot connector mechanically
+      mates with this connector — it does, once guide rails are
+      heat-formed into the sides of the slot's housing
+- [ ] Anyone with a second i7+ who can repeat the readings and confirm the
+      map is not specific to one unit
 - [ ] Anyone with teardown experience on other iRobot models (Create 3,
       other Roomba generations) who can confirm/deny shared connector
       design across the product line
@@ -169,7 +187,8 @@ firmware):
   QEMU (`qemu-system-arm`, generic `virt` machine, no network device) and
   interact with it over the emulated serial console
 - `adapter-board/` — *(coming soon)* original KiCad schematic/PCB files
-  for the open-source adapter board once the pinout is confirmed
+  for the open-source adapter board; the pinout is now measured, and the
+  USB lines still need confirming before the schematic is drawn
 - `explore.py` — quick grep-by-regex over a SquashFS image's path list,
   for poking around a rootfs before fully extracting it
 - `strs.py` — minimal `strings`-equivalent (prints runs of printable
